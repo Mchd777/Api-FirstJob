@@ -210,6 +210,96 @@ app.get('/job-offers/search', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /job-offers/{id}:
+ *   put:
+ *     summary: Modifier une offre existante
+ *     tags: [Offres]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de l'offre à modifier
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titre:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [Emploi, Stage]
+ *               secteur:
+ *                 type: string
+ *               localisation:
+ *                 type: string
+ *               niveau_experience:
+ *                 type: string
+ *                 enum: [Debutant, Intermediaire, Confirme]
+ *     responses:
+ *       200:
+ *         description: Offre mise à jour avec succès
+ *       404:
+ *         description: Offre non trouvée
+ */
+app.put('/job-offers/:id', async (req, res) => {
+  try {
+    const updatedOffer = await JobOffer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    if (!updatedOffer) {
+      return res.status(404).json({ error: 'Offre non trouvée' });
+    }
+
+    res.json(updatedOffer);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /job-offers/{id}:
+ *   delete:
+ *     summary: Supprimer une offre
+ *     tags: [Offres]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de l'offre à supprimer
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Offre supprimée avec succès
+ *       404:
+ *         description: Offre non trouvée
+ */
+app.delete('/job-offers/:id', async (req, res) => {
+  try {
+    const deletedOffer = await JobOffer.findByIdAndDelete(req.params.id);
+
+    if (!deletedOffer) {
+      return res.status(404).json({ error: 'Offre non trouvée' });
+    }
+
+    res.json({ message: 'Offre supprimée avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
